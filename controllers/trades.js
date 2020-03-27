@@ -123,10 +123,10 @@ const getByUser = async (req, res) => {
   };
 
 module.exports = {
-  getAllTrades,
-  addTrade,
-  getByUser,
-  deleteTrades,
-  getBySymbol,
-  getByIdAndSymbol
+  getAllTrades : expressErrorHandler(getAllTrades),
+  addTrade : expressErrorHandler(addTrade),
+  getByUser : expressErrorHandler(getByUser),
+  deleteTrades : expressErrorHandler(deleteTrades),
+  getBySymbol : expressErrorHandler(getBySymbol),
+  getByIdAndSymbol : expressErrorHandler(getByIdAndSymbol)
 };
