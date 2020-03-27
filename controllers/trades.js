@@ -39,8 +39,6 @@ const createTrade = async (trade) => {
   
   
   const addTrade = async (req, res, next) => {
-    // basic same id check, if present return 400
-    // else insert
     const { id, user } = req.body;
     const [userInDB, tradeInDB] = await Promise.all([
       User.findByPk(user.id),
@@ -73,12 +71,45 @@ const deleteTrades = async (req, res) => {
 };
 
 const getByUser = async (req, res) => {
-    // 404 if actor does not exist
-    // return all the events
     const { id } = req.params;
     const trades = await Trade.findAll({
       where: {
-        userId: id,
+        userId: id
+      },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name'],
+        }
+      ],
+      order: [['id']],
+    });
+    return res.status(200).send(trades);
+  };
+
+  const getBySymbol = async (req, res) => {
+    const { symbol } = req.params;
+    const trades = await Trade.findAll({
+      where: {
+        symbol: symbol
+      },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name'],
+        }
+      ],
+      order: [['id']],
+    });
+    return res.status(200).send(trades);
+  };
+
+  const getByIdAndSymbol = async (req, res) => {
+    const { id, symbol } = req.params;
+    const trades = await Trade.findAll({
+      where: {
+          userId: id,
+          symbol: symbol
       },
       include: [
         {
@@ -95,5 +126,7 @@ module.exports = {
   getAllTrades,
   addTrade,
   getByUser,
-  deleteTrades
+  deleteTrades,
+  getBySymbol,
+  getByIdAndSymbol
 };
