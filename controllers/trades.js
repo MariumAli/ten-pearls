@@ -1,5 +1,5 @@
-const Trade = require('../../models/Trade');
-const User = require('../../models/User');
+const Trade = require('../models/Trade');
+const User = require('../models/User');
 
 const getAllTrades = async (req, res) => {
     const events = await Trade.findAll({
