@@ -1,12 +1,9 @@
-const Sequelize = require('sequelize');
-const sequelize = require('../services/sqlite');
 
-const User = sequelize.define('user', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-  },
-  name: Sequelize.STRING,
-});
+class User {
+  constructor(id, name) {
+      this.id = id;
+      this.name = name;
+  }
+}
 
 module.exports = User;

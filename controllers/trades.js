@@ -1,132 +1,116 @@
+/* Load Trade Data Access Object */
+const TradeServices = require('../services/tradeServices');
+
+/* Load Controller Common function */
+const CommonController = require('./common/commonContoller');
+
+/* Load Trade entity */
 const Trade = require('../models/Trade');
-const User = require('../models/User');
 
-const getAllTrades = async (req, res) => {
-    const events = await Trade.findAll({
-      include: [
-        {
-          model: User,
-          attributes: ['id', 'name'],
-        }
-      ],
-      order: [['id']],
-    });
-    return res.status(200).send(events);
-  };
-  
-const createTrade = async (trade) => {
-    const {
-      id, type, user, symbol, shares, price, timestamp
-    } = trade;
-    await Trade.create({
-      id,
-      type,
-      symbol,
-      shares,
-      price,
-      timestamp,
-      userId: user.id
-    });
-  };
-  
-  const createUser = async (user) => {
-    const { id, name } = user;
-    await User.create({
-      id,
-      name
-    });
-  };
-  
-  
-  const addTrade = async (req, res, next) => {
-    const { id, user } = req.body;
-    const [userInDB, tradeInDB] = await Promise.all([
-      User.findByPk(user.id),
-      Trade.findByPk(id)
-    ]);
-    if (tradeInDB) {
-      return res.status(400).send({});
+/**
+ * Trade Controller
+ */
+class trades {
+
+    constructor() {
+        this.tradeServices = new TradeServices();
+        this.common = new CommonController();
     }
-    // check this event
-    if (!userInDB) {
-      await createUser(actor);
-    }
-    await createTrade(req.body);
-    return res.status(201).send({});
-  };
 
-const deleteTrades = async (req, res) => {
-  await Promise.all([
-    Trade.destroy({
-      where: {},
-      truncate: true,
-    }),
-    User.destroy({
-      where: {},
-      truncate: true,
-    })
-  ]);
+    /**
+     * Tries to find Trades for a user
+     * @params req, res
+     * @return entity
+     */
+    getByUser(req, res) {
+        let id = req.params.id;
 
-  return res.status(200).send({});
-};
+        this.tradeServices.findById(id)
+            .then(this.common.findSuccess(res))
+            .catch(this.common.findError(res));
+    };
 
-const getByUser = async (req, res) => {
-    const { id } = req.params;
-    const trades = await Trade.findAll({
-      where: {
-        userId: id
-      },
-      include: [
-        {
-          model: User,
-          attributes: ['id', 'name'],
-        }
-      ],
-      order: [['id']],
-    });
-    return res.status(200).send(trades);
-  };
+    /**
+     * Tries to find Trades for a user
+     * @params req, res
+     * @return entity
+     */
+    getBySymbol(req, res) {
+        let symbol = req.params.symbol;
 
-  const getBySymbol = async (req, res) => {
-    const { symbol } = req.params;
-    const trades = await Trade.findAll({
-      where: {
-        symbol: symbol
-      },
-      include: [
-        {
-          model: User,
-          attributes: ['id', 'name'],
-        }
-      ],
-      order: [['id']],
-    });
-    return res.status(200).send(trades);
-  };
+        this.tradeServices.findBySymbol(symbol)
+            .then(this.common.findSuccess(res))
+            .catch(this.common.findError(res));
+    };
 
-  const getByIdAndSymbol = async (req, res) => {
-    const { id, symbol } = req.params;
-    const trades = await Trade.findAll({
-      where: {
-          userId: id,
-          symbol: symbol
-      },
-      include: [
-        {
-          model: User,
-          attributes: ['id', 'name'],
-        }
-      ],
-      order: [['id']],
-    });
-    return res.status(200).send(trades);
-  };
+    /**
+     * Tries to find Trades for a user
+     * @params req, res
+     * @return entity
+     */
+    getByIdAndSymbol(req, res) {
+        let id = req.params.id;
+        let symbol = req.params.symbol;
 
-module.exports = {
-  getAllTrades : expressErrorHandler(getAllTrades),
-  addTrade : expressErrorHandler(addTrade),
-  getByUser : expressErrorHandler(getByUser),
-  deleteTrades : expressErrorHandler(deleteTrades),
-  getBySymbol : expressErrorHandler(getBySymbol),
-  getByIdAndSymbol : expressErrorHandler(getByIdAndSymbol)
-};
+        this.tradeServices.findByIdAndSymbol(id, symbol)
+            .then(this.common.findSuccess(res))
+            .catch(this.common.findError(res));
+    };
+
+    /**
+     * Finds all entities.
+     * @return all entities
+     */
+    getAllTrades(res) {
+        this.tradeServices.findAll()
+            .then(this.common.findSuccess(res))
+            .catch(this.common.findError(res));
+    };
+    
+    /**
+     * Creates the given entity in the database
+     * @params req, res
+     * returns database insertion status
+     */
+    addTrade(req, res) {
+        let trade = new Trade();
+        trade.id = req.body.id;
+        trade.type = req.body.type;
+        trade.user = req.body.user;
+        trade.symbol = req.body.symbol;
+        trade.shares = req.body.shares;
+        trade.price = req.body.price;
+        trade.timestamp = req.body.timestamp;
+
+        return this.tradeServices.createWithId(trade)
+            .then(this.common.editSuccess(res))
+            .catch(this.common.conflictError(res));
+
+    };
+
+    /**
+     * Deletes an entity using its Id / Primary Key
+     * @params req, res
+     * returns database deletion status
+     */
+    deleteTrades(req, res) {
+        this.tradeServices.deleteAll()
+            .then(this.common.findSuccess(res))
+            .catch(this.common.serverError(res));
+    };
+
+    /**
+     * Returns true if an entity exists with the given Id / Primary Key
+     * @params req, res
+     * @return
+     */
+    exists(req, res) {
+        let id = req.params.id;
+
+        this.tradeServices.exists(id)
+            .then(this.common.existsSuccess(res))
+            .catch(this.common.findError(res));
+    };
+}
+
+module.exports = trades;

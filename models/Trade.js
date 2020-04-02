@@ -1,28 +1,14 @@
-const Sequelize = require('sequelize');
-const moment = require('moment');
-const sequelize = require('../services/sqlite');
-const User = require('./User');
 
-const Trade = sequelize.define('trade', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-  },
-  type: Sequelize.STRING,
-  symbol: Sequelize.STRING,
-  shares: Sequelize.NUMBER,
-  price: Sequelize.NUMERIC,
-  timestamp: {
-    type: Sequelize.DATE,
-    get() {
-      const date = this.getDataValue('timestamp');
-      return moment(date).format('yyyy-MM-dd HH:mm:ss');
-    },
-  },
-});
-
-Trade.belongsTo(User);
-// For the User, avoid circular dependency
-User.hasMany(Trade);
+class Trade {
+  constructor(id, type, user, symbol, shares, price, timestamp) {
+      this.id = id;
+      this.type = type;
+      this.user = user;
+      this.symbol = symbol;
+      this.shares = shares;
+      this.price = price;
+      this.timestamp = timestamp;
+  }
+}
 
 module.exports = Trade;
